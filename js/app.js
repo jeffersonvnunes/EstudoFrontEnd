@@ -11,7 +11,7 @@ function processForm(e) {
       senha = document.getElementsByName("senha")[0].value;
 
   if(usuario === "admin" && senha === "admin"){
-    conteudo.innerHTML = '<object type="text/html" data="/view/usuarios.html" ></object>';
+    conteudo.innerHTML = '<object type="text/html" data="view/usuarios.html" ></object>';
   }else{
     div_erro.innerHTML = "<p>Usuário ou senha inválidos!</p>";
   }
