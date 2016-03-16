@@ -8,7 +8,11 @@ type
 
   [MVCPath('/')]
   TUsuarioDomain = class(TMVCController)
+  private
+    FCaminhoArquivo: String;
   public
+    constructor Create; override;
+
     [MVCHTTPMethod([httpGET])]
     [MVCPath('/usuario')]
     procedure ListaUsuarios(CTX:TWebContext);
@@ -54,11 +58,11 @@ begin
 
   try
     try
-      if FileExists(ExtractFileDir(Application.ExeName)+'/json/'+vArq)then
+      if FileExists(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq)then
       begin
-        vJson.LoadFromFile(ExtractFileDir(Application.ExeName)+'/json/'+vArq, TEncoding.UTF8);
+        vJson.LoadFromFile(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq, TEncoding.UTF8);
         vJson.Text := UTF8ToString(CTX.Request.RawWebRequest.Content);
-        vJson.SaveToFile(ExtractFileDir(Application.ExeName)+'/json/'+vArq);
+        vJson.SaveToFile(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq);
         CTX.Response.StatusCode := THttpStatus.HttpSuccess;
       end
       else
@@ -82,6 +86,12 @@ begin
   end;
 end;
 
+constructor TUsuarioDomain.Create;
+begin
+  inherited;
+  self.FCaminhoArquivo := ExtractFileDir(Application.ExeName)+'\json\usuario';
+end;
+
 procedure TUsuarioDomain.ExcluiUsuario(CTX: TWebContext);
 var
   vJson: TStringList;
@@ -92,9 +102,9 @@ begin
   vArq := 'Usuario_'+CTX.Request.Params['cdUsuario']+'.json';
 
   try
-    if FileExists(ExtractFileDir(Application.ExeName)+'/json/'+vArq)then
+    if FileExists(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq)then
     begin
-      DeleteFile(ExtractFileDir(Application.ExeName)+'/json/'+vArq);
+      DeleteFile(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq);
     end;
   except
   on e: Exception do
@@ -119,9 +129,9 @@ begin
   vJson := TStringList.Create;
 
   try
-    if FileExists(ExtractFileDir(Application.ExeName)+'/json/'+vArq)then
+    if FileExists(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq)then
     begin
-      vJson.LoadFromFile(ExtractFileDir(Application.ExeName)+'/json/'+vArq, TEncoding.UTF8);
+      vJson.LoadFromFile(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq, TEncoding.UTF8);
 
       CTX.Response.StatusCode             := THttpStatus.HttpSuccess;
       CTX.Response.RawWebResponse.Content := vJson.Text;
@@ -149,11 +159,11 @@ begin
 
   try
     try
-      if not DirectoryExists(ExtractFileDir(Application.ExeName)+'/json/') then
-        CreateDir(ExtractFileDir(Application.ExeName)+'/json/');
+      if not DirectoryExists(self.FCaminhoArquivo) then
+        ForceDirectories(self.FCaminhoArquivo);
 
       vJson.Text := UTF8ToString(CTX.Request.RawWebRequest.Content);
-      vJson.SaveToFile(ExtractFileDir(Application.ExeName)+'/json/'+vArq);
+      vJson.SaveToFile(IncludeTrailingBackslash(self.FCaminhoArquivo)+vArq);
 
       CTX.Response.StatusCode := THttpStatus.HttpSuccess;
       CTX.Response.RawWebResponse.Content := vJson.Text;
@@ -176,25 +186,23 @@ procedure TUsuarioDomain.ListaUsuarios(CTX: TWebContext);
 var
   vSr: TSearchRec;
   vJson: TStringList;
-  vCaminho: String;
   vJsonRetorno: String;
 begin
   CTX.Response.SetCustomHeader('Access-Control-Allow-Origin','*');
   CTX.Response.ContentType := 'application/json; charset=UTF-8';
   CTX.Response.StatusCode := THttpStatus.HttpSuccess;
   vJson := TStringList.Create;
-  vCaminho := ExtractFileDir(Application.ExeName)+'/json/';
 
   vJsonRetorno := '';
 
   try
     try
-      if FindFirst(vCaminho+'*.*',faAnyFile,vSr) = 0 then
+      if FindFirst(IncludeTrailingBackslash(self.FCaminhoArquivo)+'*.*',faAnyFile,vSr) = 0 then
       begin
         repeat
           if (vSr.Name <> '.') and (vSr.Name <> '..') then
           begin
-            vJson.LoadFromFile(vCaminho + vSr.Name, TEncoding.UTF8);
+            vJson.LoadFromFile(IncludeTrailingBackslash(self.FCaminhoArquivo) + vSr.Name, TEncoding.UTF8);
 
             if vJsonRetorno = '' then
             begin
