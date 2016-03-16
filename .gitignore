@@ -46,3 +46,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 .idea/*
+*.local
+*.identcache
+*/_history/*
+/servico/Win32/Debug/json
+/servico/Win32/Debug/DCU/*.dcu
+*.~*
+*.log
